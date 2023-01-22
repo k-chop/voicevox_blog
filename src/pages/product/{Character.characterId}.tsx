@@ -196,19 +196,19 @@ const ProductPage = ({ params, location }: PageProps) => {
   }, [])
 
   const from = location.state.from === "right" ? "right" : "left"
-  const to = from === "right" ? "left" : "right"
+  const to = from === "right" ? "leftOut" : "rightOut"
 
   const [initial, setInitial] = useState<keyof typeof variants>(from)
   const [exit, setExit] = useState<keyof typeof variants>(to)
 
   const toLeft = () => {
     setInitial(() => "left")
-    setExit(() => "right")
+    setExit(() => "rightOut")
   }
 
   const toRight = () => {
     setInitial(() => "right")
-    setExit(() => "left")
+    setExit(() => "leftOut")
   }
 
   // 画像
@@ -224,8 +224,24 @@ const ProductPage = ({ params, location }: PageProps) => {
     query.featureImage.nodes[0].childImageSharp!.gatsbyImageData
 
   const variants = {
-    left: { opacity: 0, x: -200 },
-    right: { opacity: 0, x: 200 },
+    left: {
+      opacity: 0,
+      transform: "translateX(-10%)",
+    },
+    rightOut: {
+      opacity: 0,
+      transform: "translateX(0%)",
+      transition: { ease: "easeOut", duration: 0.08 },
+    },
+    right: {
+      opacity: 0,
+      transform: "translateX(0%)",
+    },
+    leftOut: {
+      opacity: 0,
+      transform: "translateX(-10%)",
+      transition: { ease: "easeOut", duration: 0.08 },
+    },
   }
 
   return (
@@ -254,19 +270,19 @@ const ProductPage = ({ params, location }: PageProps) => {
             >
               <FontAwesomeIcon icon={faCircleRight} />
             </button>
-            <motion.div
-              className="top-character"
-              variants={variants}
-              initial={initial}
-              animate={{ opacity: 1, x: 0 }}
-              exit={exit}
-              transition={{
-                type: "tween",
-                delay: 0,
-                duration: 0.1,
-              }}
-            >
-              <div key={characterKey} className={`image-wrapper`}>
+            <div className="top-character">
+              <motion.div
+                key={characterKey}
+                className={`image-wrapper`}
+                variants={variants}
+                initial={initial}
+                animate={{
+                  opacity: 1,
+                  transform: "translateX(-5%)",
+                  transition: { ease: "easeIn", duration: 0.08 },
+                }}
+                exit={exit}
+              >
                 <GatsbyImage
                   image={characterInfos[characterKey]!.portraitImage}
                   alt={characterInfos[characterKey]!.name}
@@ -278,7 +294,7 @@ const ProductPage = ({ params, location }: PageProps) => {
                     flex: "0 0 auto",
                   }}
                 />
-              </div>
+              </motion.div>
 
               <div className="info pb-5">
                 <div className="detail p-4">
@@ -316,7 +332,7 @@ const ProductPage = ({ params, location }: PageProps) => {
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
             <div className="description">
               <h1 className="title">VOICEVOX {characterInfo.name}</h1>
               <p className="is-size-5">
