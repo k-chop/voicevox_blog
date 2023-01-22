@@ -195,7 +195,7 @@ const ProductPage = ({ params, location }: PageProps) => {
     history.replaceState({ characterKey }, "")
   }, [])
 
-  const from = location.state.from === "right" ? "right" : "left"
+  const from = location.state?.from === "right" ? "right" : "left"
   const to = from === "right" ? "leftOut" : "rightOut"
 
   const [initial, setInitial] = useState<keyof typeof variants>(from)
