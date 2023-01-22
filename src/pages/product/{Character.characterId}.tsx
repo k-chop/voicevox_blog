@@ -4,7 +4,7 @@ import {
   faDownload,
 } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { graphql, Link, PageProps, useStaticQuery } from "gatsby"
+import { graphql, Link, navigate, PageProps, useStaticQuery } from "gatsby"
 import { GatsbyImage } from "gatsby-plugin-image"
 import React, {
   useCallback,
@@ -24,8 +24,9 @@ import StyleDropdown, {
 import { CharacterContext, GlobalContext } from "../../contexts/context"
 import { useDetailedCharacterInfo } from "../../hooks/useDetailedCharacterInfo"
 import { CharacterKey } from "../../types/dormitoryCharacter"
+import { motion } from "framer-motion"
 
-const ProductPage = ({ params }: PageProps) => {
+const ProductPage = ({ params, location }: PageProps) => {
   const query = useStaticQuery<Queries.ProductQuery>(graphql`
     query Product {
       thumbImage: allFile(
@@ -102,25 +103,25 @@ const ProductPage = ({ params }: PageProps) => {
     [characterInfo, selectedStyle]
   )
 
-  // キャラクター変更アニメーション
-  type CharaAnimeObject = {
-    characterKey: CharacterKey
-    ref: React.MutableRefObject<HTMLDivElement | null>
-    state: "entering" | "staying" | "leaving"
-    direction: "left" | "right"
-  }
-  const [nowCharaAnimeObject, setNowCharaAnimeObject] =
-    useState<CharaAnimeObject>({
-      characterKey,
-      ref: React.createRef(),
-      state: "staying",
-      direction: "left",
-    })
-  const [prevCharaAnimeObject, setPrevCharaAnimeObject] = useState<
-    CharaAnimeObject | undefined
-  >(undefined)
+  // // キャラクター変更アニメーション
+  // type CharaAnimeObject = {
+  //   characterKey: CharacterKey
+  //   ref: React.MutableRefObject<HTMLDivElement | null>
+  //   state: "entering" | "staying" | "leaving"
+  //   direction: "left" | "right"
+  // }
+  // const [nowCharaAnimeObject, setNowCharaAnimeObject] =
+  //   useState<CharaAnimeObject>({
+  //     characterKey,
+  //     ref: React.createRef(),
+  //     state: "staying",
+  //     direction: "left",
+  //   })
+  // const [prevCharaAnimeObject, setPrevCharaAnimeObject] = useState<
+  //   CharaAnimeObject | undefined
+  // >(undefined)
 
-  // キャラクター変更（ページ遷移）
+  // // キャラクター変更（ページ遷移）
   const { characterKeys } = useContext(CharacterContext)
   const prevCharacterKey =
     characterKeys[
@@ -133,66 +134,82 @@ const ProductPage = ({ params }: PageProps) => {
     ]
   const changeToCharacter = useCallback(
     (nextCharacterKey: CharacterKey) => {
-      setCharacterId(characterInfos[nextCharacterKey]!.id)
-      setSelectedStyle(
-        characterInfos[nextCharacterKey]!.styleVoiceUrls[0].style
-      )
+      //   setCharacterId(characterInfos[nextCharacterKey]!.id)
+      //   setSelectedStyle(
+      //     characterInfos[nextCharacterKey]!.styleVoiceUrls[0].style
+      //   )
 
-      // アニメーション用
-      const diff =
-        characterKeys.indexOf(nextCharacterKey) -
-        characterKeys.indexOf(characterKey)
-      const direction =
-        (diff + characterKeys.length) % characterKeys.length <=
-        characterKeys.length / 2
-          ? "right"
-          : "left"
-      setPrevCharaAnimeObject({
-        ...nowCharaAnimeObject,
-        state: "leaving",
-        direction,
-      })
-      setNowCharaAnimeObject({
-        characterKey: nextCharacterKey,
-        ref: React.createRef(),
-        state: "entering",
-        direction,
-      })
+      //   // アニメーション用
+      //   const diff =
+      //     characterKeys.indexOf(nextCharacterKey) -
+      //     characterKeys.indexOf(characterKey)
+      //   const direction =
+      //     (diff + characterKeys.length) % characterKeys.length <=
+      //     characterKeys.length / 2
+      //       ? "right"
+      //       : "left"
+      //   setPrevCharaAnimeObject({
+      //     ...nowCharaAnimeObject,
+      //     state: "leaving",
+      //     direction,
+      //   })
+      //   setNowCharaAnimeObject({
+      //     characterKey: nextCharacterKey,
+      //     ref: React.createRef(),
+      //     state: "entering",
+      //     direction,
+      //   })
 
-      window.history.pushState(
-        { characterKey: nextCharacterKey },
-        "",
-        `/product/${characterInfos[nextCharacterKey]!.id}/`
-      )
+      // window.history.pushState(
+      //   { characterKey: nextCharacterKey },
+      //   "",
+      //   `/product/${characterInfos[nextCharacterKey]!.id}/`
+      // )
       // // FIXME: たぶん本来は↓のgatsby.navigateを使うのが正しいけど、フラッシュするので使用できない
-      // navigate(`/product/${characterInfos[nextCharacterKey]!.id}/`, {
-      //   state: { characterKey: nextCharacterKey },
-      // })
+      navigate(`/product/${characterInfos[nextCharacterKey]!.id}/`, {
+        state: { characterKey: nextCharacterKey, from: initial },
+      })
     },
     [characterInfos]
   )
 
   // ブラウザバックを無効化し、コード側でキャラクター変更する
   // TODO: なぜかうまくいかない。勝手にリロードされて404になってしまう？
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      if (
-        event.state?.characterKey != undefined &&
-        event.state?.characterKey != characterKey
-      ) {
-        setCharacterId(characterInfos[event.state.characterKey]!.id)
-      }
-    }
-    window.addEventListener("popstate", handlePopState)
-    return () => {
-      window.removeEventListener("popstate", handlePopState)
-    }
-  }, [characterKey])
+  // useEffect(() => {
+  //   const handlePopState = (event: PopStateEvent) => {
+  //     if (
+  //       event.state?.characterKey != undefined &&
+  //       event.state?.characterKey != characterKey
+  //     ) {
+  //       setCharacterId(characterInfos[event.state.characterKey]!.id)
+  //     }
+  //   }
+  //   window.addEventListener("popstate", handlePopState)
+  //   return () => {
+  //     window.removeEventListener("popstate", handlePopState)
+  //   }
+  // }, [characterKey])
 
   // 最初に来たときはそのキャラクターをセット
   useEffect(() => {
     history.replaceState({ characterKey }, "")
   }, [])
+
+  const from = location.state.from === "right" ? "right" : "left"
+  const to = from === "right" ? "left" : "right"
+
+  const [initial, setInitial] = useState<keyof typeof variants>(from)
+  const [exit, setExit] = useState<keyof typeof variants>(to)
+
+  const toLeft = () => {
+    setInitial(() => "left")
+    setExit(() => "right")
+  }
+
+  const toRight = () => {
+    setInitial(() => "right")
+    setExit(() => "left")
+  }
 
   // 画像
   const thumbImage = query.thumbImage.nodes.find(
@@ -205,6 +222,11 @@ const ProductPage = ({ params }: PageProps) => {
     throw new Error("featureImage is not found")
   const featureImage =
     query.featureImage.nodes[0].childImageSharp!.gatsbyImageData
+
+  const variants = {
+    left: { opacity: 0, x: -200 },
+    right: { opacity: 0, x: 200 },
+  }
 
   return (
     <Page>
@@ -219,6 +241,7 @@ const ProductPage = ({ params }: PageProps) => {
             <button
               className="button prev circle-icon"
               onClick={() => changeToCharacter(prevCharacterKey)}
+              onMouseOver={toLeft}
               aria-label="前のキャラクターを表示"
             >
               <FontAwesomeIcon icon={faCircleLeft} />
@@ -226,36 +249,37 @@ const ProductPage = ({ params }: PageProps) => {
             <button
               className="button post circle-icon"
               onClick={() => changeToCharacter(postCharacterKey)}
+              onMouseOver={toRight}
               aria-label="次のキャラクターを表示"
             >
               <FontAwesomeIcon icon={faCircleRight} />
             </button>
-            <div className="top-character">
-              {[prevCharaAnimeObject, nowCharaAnimeObject].map(
-                obj =>
-                  obj && (
-                    <div
-                      key={obj.characterKey}
-                      ref={obj.ref}
-                      className={`image-wrapper ${
-                        obj.state != "staying" &&
-                        `${obj.state}-${obj.direction}`
-                      }`}
-                    >
-                      <GatsbyImage
-                        image={characterInfos[obj.characterKey]!.portraitImage}
-                        alt={characterInfos[obj.characterKey]!.name}
-                        objectFit="cover"
-                        imgStyle={{ height: "100%", width: "auto" }}
-                        style={{
-                          height: "100%",
-                          width: "auto",
-                          flex: "0 0 auto",
-                        }}
-                      />
-                    </div>
-                  )
-              )}
+            <motion.div
+              className="top-character"
+              variants={variants}
+              initial={initial}
+              animate={{ opacity: 1, x: 0 }}
+              exit={exit}
+              transition={{
+                type: "tween",
+                delay: 0,
+                duration: 0.1,
+              }}
+            >
+              <div key={characterKey} className={`image-wrapper`}>
+                <GatsbyImage
+                  image={characterInfos[characterKey]!.portraitImage}
+                  alt={characterInfos[characterKey]!.name}
+                  objectFit="cover"
+                  imgStyle={{ height: "100%", width: "auto" }}
+                  style={{
+                    height: "100%",
+                    width: "auto",
+                    flex: "0 0 auto",
+                  }}
+                />
+              </div>
+
               <div className="info pb-5">
                 <div className="detail p-4">
                   <p>{characterInfo.description.replaceAll("<br />", "")}</p>
@@ -292,7 +316,7 @@ const ProductPage = ({ params }: PageProps) => {
                   )}
                 </div>
               </div>
-            </div>
+            </motion.div>
             <div className="description">
               <h1 className="title">VOICEVOX {characterInfo.name}</h1>
               <p className="is-size-5">
