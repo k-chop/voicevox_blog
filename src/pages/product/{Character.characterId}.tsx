@@ -26,7 +26,10 @@ import { useDetailedCharacterInfo } from "../../hooks/useDetailedCharacterInfo"
 import { CharacterKey } from "../../types/dormitoryCharacter"
 import { motion } from "framer-motion"
 
-const ProductPage = ({ params, location }: PageProps) => {
+const ProductPage = ({
+  params,
+  location,
+}: PageProps<null, null, { from?: string }>) => {
   const query = useStaticQuery<Queries.ProductQuery>(graphql`
     query Product {
       thumbImage: allFile(
